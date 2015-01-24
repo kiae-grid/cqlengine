@@ -408,7 +408,7 @@ class BaseModel(object):
                     '{} is not a subclass of {}'.format(klass.__name__, cls.__name__)
                 )
 
-            field_dict = {k: v for k, v in field_dict.items() if k in klass._columns.keys()}
+            field_dict = dict((k, v) for (k, v) in field_dict.items() if k in klass._columns.keys())
 
         else:
             klass = cls

@@ -16,11 +16,11 @@ class AssignmentClauseTests(TestCase):
 class SetUpdateClauseTests(TestCase):
 
     def test_update_from_none(self):
-        c = SetUpdateClause('s', {1, 2}, previous=None)
+        c = SetUpdateClause('s', set(1, 2), previous=None)
         c._analyze()
         c.set_context_id(0)
 
-        self.assertEqual(c._assignments, {1, 2})
+        self.assertEqual(c._assignments, set(1, 2))
         self.assertIsNone(c._additions)
         self.assertIsNone(c._removals)
 
@@ -29,11 +29,11 @@ class SetUpdateClauseTests(TestCase):
 
         ctx = {}
         c.update_context(ctx)
-        self.assertEqual(ctx, {'0': {1, 2}})
+        self.assertEqual(ctx, {'0': set(1, 2)})
 
     def test_null_update(self):
         """ tests setting a set to None creates an empty update statement """
-        c = SetUpdateClause('s', None, previous={1, 2})
+        c = SetUpdateClause('s', None, previous=set(1, 2))
         c._analyze()
         c.set_context_id(0)
 
@@ -50,7 +50,7 @@ class SetUpdateClauseTests(TestCase):
 
     def test_no_update(self):
         """ tests an unchanged value creates an empty update statement """
-        c = SetUpdateClause('s', {1, 2}, previous={1, 2})
+        c = SetUpdateClause('s', set(1, 2), previous=set(1, 2))
         c._analyze()
         c.set_context_id(0)
 
@@ -84,12 +84,12 @@ class SetUpdateClauseTests(TestCase):
         self.assertEqual(ctx, {'0' : set()})
 
     def test_additions(self):
-        c = SetUpdateClause('s', {1, 2, 3}, previous={1, 2})
+        c = SetUpdateClause('s', set(1, 2, 3), previous=set(1, 2))
         c._analyze()
         c.set_context_id(0)
 
         self.assertIsNone(c._assignments)
-        self.assertEqual(c._additions, {3})
+        self.assertEqual(c._additions, set(3))
         self.assertIsNone(c._removals)
 
         self.assertEqual(c.get_context_size(), 1)
@@ -97,39 +97,39 @@ class SetUpdateClauseTests(TestCase):
 
         ctx = {}
         c.update_context(ctx)
-        self.assertEqual(ctx, {'0': {3}})
+        self.assertEqual(ctx, {'0': set(3)})
 
     def test_removals(self):
-        c = SetUpdateClause('s', {1, 2}, previous={1, 2, 3})
+        c = SetUpdateClause('s', set(1, 2), previous=set(1, 2, 3))
         c._analyze()
         c.set_context_id(0)
 
         self.assertIsNone(c._assignments)
         self.assertIsNone(c._additions)
-        self.assertEqual(c._removals, {3})
+        self.assertEqual(c._removals, set(3))
 
         self.assertEqual(c.get_context_size(), 1)
         self.assertEqual(str(c), '"s" = "s" - %(0)s')
 
         ctx = {}
         c.update_context(ctx)
-        self.assertEqual(ctx, {'0': {3}})
+        self.assertEqual(ctx, {'0': set(3)})
 
     def test_additions_and_removals(self):
-        c = SetUpdateClause('s', {2, 3}, previous={1, 2})
+        c = SetUpdateClause('s', set(2, 3), previous=set(1, 2))
         c._analyze()
         c.set_context_id(0)
 
         self.assertIsNone(c._assignments)
-        self.assertEqual(c._additions, {3})
-        self.assertEqual(c._removals, {1})
+        self.assertEqual(c._additions, set(3))
+        self.assertEqual(c._removals, set(1))
 
         self.assertEqual(c.get_context_size(), 2)
         self.assertEqual(str(c), '"s" = "s" + %(0)s, "s" = "s" - %(1)s')
 
         ctx = {}
         c.update_context(ctx)
-        self.assertEqual(ctx, {'0': {3}, '1': {1}})
+        self.assertEqual(ctx, {'0': set(3), '1': set(1)})
 
 
 class ListUpdateClauseTests(TestCase):

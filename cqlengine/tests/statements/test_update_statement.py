@@ -46,7 +46,7 @@ class UpdateStatementTests(TestCase):
 
     def test_update_set_add(self):
         us = UpdateStatement('table')
-        us.add_assignment_clause(SetUpdateClause('a', Set.Quoter({1}), operation='add'))
+        us.add_assignment_clause(SetUpdateClause('a', Set.Quoter(set(1)), operation='add'))
         self.assertEqual(six.text_type(us), 'UPDATE table SET "a" = "a" + %(0)s')
 
     def test_update_empty_set_add_does_not_assign(self):

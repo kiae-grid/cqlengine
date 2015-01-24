@@ -86,7 +86,7 @@ class TestSetColumn(BaseCassEngTestCase):
 
     def test_io_success(self):
         """ Tests that a basic usage works as expected """
-        m1 = TestSetModel.create(int_set={1, 2}, text_set={'kai', 'andreas'})
+        m1 = TestSetModel.create(int_set=set(1, 2), text_set=set('kai', 'andreas'))
         m2 = TestSetModel.get(partition=m1.partition)
 
         assert isinstance(m2.int_set, set)
@@ -103,28 +103,28 @@ class TestSetColumn(BaseCassEngTestCase):
         Tests that attempting to use the wrong types will raise an exception
         """
         with self.assertRaises(ValidationError):
-            TestSetModel.create(int_set={'string', True}, text_set={1, 3.0})
+            TestSetModel.create(int_set=set('string', True), text_set=set(1, 3.0))
 
     def test_element_count_validation(self):
         """
         Tests that big collections are detected and raise an exception.
         """
-        TestSetModel.create(text_set={str(uuid4()) for i in range(65535)})
+        TestSetModel.create(text_set=set(str(uuid4()) for i in range(65535)))
         with self.assertRaises(ValidationError):
-            TestSetModel.create(text_set={str(uuid4()) for i in range(65536)})
+            TestSetModel.create(text_set=set(str(uuid4()) for i in range(65536)))
 
     def test_partial_updates(self):
         """ Tests that partial udpates work as expected """
-        m1 = TestSetModel.create(int_set={1, 2, 3, 4})
+        m1 = TestSetModel.create(int_set=set(1, 2, 3, 4))
 
         m1.int_set.add(5)
         m1.int_set.remove(1)
-        assert m1.int_set == {2, 3, 4, 5}
+        assert m1.int_set == set(2, 3, 4, 5)
 
         m1.save()
 
         m2 = TestSetModel.get(partition=m1.partition)
-        assert m2.int_set == {2, 3, 4, 5}
+        assert m2.int_set == set(2, 3, 4, 5)
 
     def test_instantiation_with_column_class(self):
         """
@@ -144,9 +144,9 @@ class TestSetColumn(BaseCassEngTestCase):
     def test_to_python(self):
         """ Tests that to_python of value column is called """
         column = columns.Set(JsonTestColumn)
-        val = {1, 2, 3}
+        val = set(1, 2, 3)
         db_val = column.to_database(val)
-        assert db_val.value == {json.dumps(v) for v in val}
+        assert db_val.value == set(json.dumps(v) for v in val)
         py_val = column.to_python(db_val.value)
         assert py_val == val
 
@@ -154,12 +154,12 @@ class TestSetColumn(BaseCassEngTestCase):
         """ tests that the default empty container is not saved if it hasn't been updated """
         pkey = uuid4()
         # create a row with set data
-        TestSetModel.create(partition=pkey, int_set={3, 4})
+        TestSetModel.create(partition=pkey, int_set=set(3, 4))
         # create another with no set data
         TestSetModel.create(partition=pkey)
 
         m = TestSetModel.get(partition=pkey)
-        self.assertEqual(m.int_set, {3, 4})
+        self.assertEqual(m.int_set, set(3, 4))
 
 
 class TestListModel(Model):
@@ -389,9 +389,9 @@ class TestMapColumn(BaseCassEngTestCase):
         """
         Tests that big collections are detected and raise an exception.
         """
-        TestMapModel.create(text_map={str(uuid4()): i for i in range(65535)})
+        TestMapModel.create(text_map=dict((str(uuid4()), i) for i in range(65535)))
         with self.assertRaises(ValidationError):
-            TestMapModel.create(text_map={str(uuid4()): i for i in range(65536)})
+            TestMapModel.create(text_map=dict((str(uuid4()), i) for i in range(65536)))
 
     def test_partial_updates(self):
         """ Tests that partial udpates work as expected """
@@ -474,7 +474,7 @@ class TestMapColumn(BaseCassEngTestCase):
         column = columns.Map(JsonTestColumn, JsonTestColumn)
         val = {1: 2, 3: 4, 5: 6}
         db_val = column.to_database(val)
-        assert db_val.value == {json.dumps(k):json.dumps(v) for k,v in val.items()}
+        assert db_val.value == dict((json.dumps(k), json.dumps(v)) for (k,v) in val.items())
         py_val = column.to_python(db_val.value)
         assert py_val == val
 

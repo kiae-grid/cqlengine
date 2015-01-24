@@ -599,17 +599,17 @@ class Set(BaseContainerColumn):
         if None in val:
             raise ValidationError("{} None not allowed in a set".format(self.column_name))
 
-        return {self.value_col.validate(v) for v in val}
+        return set(self.value_col.validate(v) for v in val)
 
     def to_python(self, value):
         if value is None: return set()
-        return {self.value_col.to_python(v) for v in value}
+        return set(self.value_col.to_python(v) for v in value)
 
     def to_database(self, value):
         if value is None: return None
 
         if isinstance(value, self.Quoter): return value
-        return self.Quoter({self.value_col.to_database(v) for v in value})
+        return self.Quoter(set(self.value_col.to_database(v) for v in value))
 
 
 
@@ -714,18 +714,18 @@ class Map(BaseContainerColumn):
         if val is None: return
         if not isinstance(val, dict):
             raise ValidationError('{} {} is not a dict object'.format(self.column_name, val))
-        return {self.key_col.validate(k):self.value_col.validate(v) for k,v in val.items()}
+        return dict((self.key_col.validate(k), self.value_col.validate(v)) for (k,v) in val.items())
 
     def to_python(self, value):
         if value is None:
             return {}
         if value is not None:
-            return {self.key_col.to_python(k): self.value_col.to_python(v) for k,v in value.items()}
+            return dict((self.key_col.to_python(k), self.value_col.to_python(v)) for (k,v) in value.items())
 
     def to_database(self, value):
         if value is None: return None
         if isinstance(value, self.Quoter): return value
-        return self.Quoter({self.key_col.to_database(k):self.value_col.to_database(v) for k,v in value.items()})
+        return self.Quoter(dict((self.key_col.to_database(k), self.value_col.to_database(v)) for k,v in value.items()))
 
 
 
