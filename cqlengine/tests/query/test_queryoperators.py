@@ -84,7 +84,7 @@ class TestTokenFunction(BaseCassEngTestCase):
         q = TestModel.objects.filter(pk__token__gt=func)
         where = q._where[0]
         where.set_context_id(1)
-        self.assertEquals(str(where), 'token("p1", "p2") > token(%({})s, %({})s)'.format(1, 2))
+        self.assertEquals(str(where), 'token("p1", "p2") > token(%({0})s, %({1})s)'.format(1, 2))
 
         # Verify that a SELECT query can be successfully generated
         str(q._select_query())
@@ -96,7 +96,7 @@ class TestTokenFunction(BaseCassEngTestCase):
         q = TestModel.objects.filter(pk__token__gt=func)
         where = q._where[0]
         where.set_context_id(1)
-        self.assertEquals(str(where), 'token("p1", "p2") > token(%({})s, %({})s)'.format(1, 2))
+        self.assertEquals(str(where), 'token("p1", "p2") > token(%({0})s, %({1})s)'.format(1, 2))
         str(q._select_query())
 
         # The 'pk__token' virtual column may only be compared to a Token

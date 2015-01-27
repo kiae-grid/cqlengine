@@ -345,7 +345,7 @@ class TestPythonDoesntDieWhenExtraFieldIsInCassandra(BaseCassEngTestCase):
         drop_table(self.TestModel)
         sync_table(self.TestModel)
         self.TestModel.create()
-        execute("ALTER TABLE {} add blah int".format(self.TestModel.column_family_name(include_keyspace=True)))
+        execute("ALTER TABLE {0} add blah int".format(self.TestModel.column_family_name(include_keyspace=True)))
         self.TestModel.objects().all()
 
 class TestTimeUUIDFromDatetime(TestCase):

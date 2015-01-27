@@ -36,7 +36,7 @@ class TzOffset(tzinfo):
         return self._offset
 
     def tzname(self, dt):
-        return 'TzOffset: {}'.format(self._offset.hours)
+        return 'TzOffset: {0}'.format(self._offset.hours)
 
     def dst(self, dt):
         return timedelta(0)
