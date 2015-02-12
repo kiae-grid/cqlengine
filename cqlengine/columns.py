@@ -10,6 +10,7 @@ from cassandra.encoder import cql_quote
 import six
 
 import sys
+from utils import total_seconds
 
 # move to central spot
 class UnicodeMixin(object):
@@ -352,9 +353,9 @@ class DateTime(Column):
             else:
                 raise ValidationError("{0} '{1}' is not a datetime object".format(self.column_name, value))
         epoch = datetime(1970, 1, 1, tzinfo=value.tzinfo)
-        offset = epoch.tzinfo.utcoffset(epoch).total_seconds() if epoch.tzinfo else 0
+        offset = total_seconds(epoch.tzinfo.utcoffset(epoch)) if epoch.tzinfo else 0
 
-        return int(((value - epoch).total_seconds() - offset) * 1000)
+        return int((total_seconds(value - epoch) - offset) * 1000)
 
 
 class Date(Column):
@@ -379,7 +380,7 @@ class Date(Column):
         if not isinstance(value, date):
             raise ValidationError("{0} '{1}' is not a date object".format(self.column_name, repr(value)))
 
-        return int((value - date(1970, 1, 1)).total_seconds() * 1000)
+        return int(total_seconds(value - date(1970, 1, 1)) * 1000)
 
 
 class UUID(Column):
@@ -427,8 +428,8 @@ class TimeUUID(UUID):
         global _last_timestamp
 
         epoch = datetime(1970, 1, 1, tzinfo=dt.tzinfo)
-        offset = epoch.tzinfo.utcoffset(epoch).total_seconds() if epoch.tzinfo else 0
-        timestamp = (dt  - epoch).total_seconds() - offset
+        offset = total_seconds(epoch.tzinfo.utcoffset(epoch)) if epoch.tzinfo else 0
+        timestamp = total_seconds(dt  - epoch) - offset
 
         node = None
         clock_seq = None

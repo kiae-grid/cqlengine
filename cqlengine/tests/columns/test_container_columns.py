@@ -8,6 +8,8 @@ from cqlengine import columns
 from cqlengine.management import sync_table, drop_table
 from cqlengine.tests.base import BaseCassEngTestCase
 
+from utils import total_seconds
+
 
 class TestSetModel(Model):
 
@@ -375,8 +377,8 @@ class TestMapColumn(BaseCassEngTestCase):
 
         assert 'now' in m2.text_map
         assert 'then' in m2.text_map
-        assert (now - m2.text_map['now']).total_seconds() < 0.001
-        assert (then - m2.text_map['then']).total_seconds() < 0.001
+        assert total_seconds(now - m2.text_map['now']) < 0.001
+        assert total_seconds(then - m2.text_map['then']) < 0.001
 
     def test_type_validation(self):
         """

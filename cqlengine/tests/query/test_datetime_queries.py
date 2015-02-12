@@ -10,6 +10,8 @@ from cqlengine.models import Model
 from cqlengine import columns
 from cqlengine import query
 
+from utils import total_seconds
+
 class DateTimeQueryTestModel(Model):
 
     user        = columns.Integer(primary_key=True)
@@ -53,6 +55,6 @@ class TestDateTimeQueries(BaseCassEngTestCase):
         obj = DateTimeQueryTestModel.create(user=pk, day=now, data='energy cheese')
         load = DateTimeQueryTestModel.get(user=pk)
 
-        assert abs(now - load.day).total_seconds() < 0.001
+        assert abs(total_seconds(now - load.day)) < 0.001
         obj.delete()
 
